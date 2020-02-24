@@ -41,7 +41,8 @@ public class GameActivity extends AppCompatActivity {
     private Button start, pause;
 
     private int seconds = 0;
-    private static boolean running;
+    private static boolean running = false;
+    private static boolean solved = false;
 
     private static String selected ="";
 
@@ -67,6 +68,7 @@ public class GameActivity extends AppCompatActivity {
 
         pause = findViewById(R.id.btnPause);
         pause.setOnClickListener(pauseGame);
+        pause.setClickable(false);
 
         runTimer();
     }
@@ -112,6 +114,7 @@ public class GameActivity extends AppCompatActivity {
                 for (int i = 0; i < tileList.length; i++){
                     button = new Button(context);
 
+
                     if(tileList[i].equals("0")){
                         button.setBackgroundResource(R.drawable.cat_piece_1);
                     } else if(tileList[i].equals("1")){
@@ -153,6 +156,7 @@ public class GameActivity extends AppCompatActivity {
             case "dog":{
                 for (int i = 0; i < tileList.length; i++){
                     button = new Button(context);
+                    if(!running) button.setClickable(false);
 
                     if(tileList[i].equals("0")){
                         button.setBackgroundResource(R.drawable.dog_piece_1);
@@ -188,6 +192,7 @@ public class GameActivity extends AppCompatActivity {
                         button.setBackgroundResource(R.drawable.dog_piece_16);
                         button.setVisibility(View.INVISIBLE);
                     }
+
                     buttons.add(button);
                 }
             } break;
@@ -228,6 +233,7 @@ public class GameActivity extends AppCompatActivity {
         public void onClick(View v) {
             v.setClickable(false);
             running = true;
+            pause.setClickable(true);
             scramble();//перемешивание ячеек в массиве
             display(context);
         }
@@ -239,7 +245,6 @@ public class GameActivity extends AppCompatActivity {
             running = false;
             String title = "Игра на паузе.";
             String posString = "Продолжить";
-            running = false;
             AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(context,R.style.AlertDialogCustom));
             ad.setTitle(title);  // заголовок
             ad.setPositiveButton(posString, new DialogInterface.OnClickListener() {
@@ -256,25 +261,25 @@ public class GameActivity extends AppCompatActivity {
 
 
     private static void swap(Context context, int position, int swap){
-        if(tileList[position+swap].equals("15")) {
-            String newPosition = tileList[position + swap];
-            tileList[position + swap] = tileList[position];
-            tileList[position] = newPosition;
-        }
-        display(context);
+        if (running) {
+            if (tileList[position + swap].equals("15")) {
+                String newPosition = tileList[position + swap];
+                tileList[position + swap] = tileList[position];
+                tileList[position] = newPosition;
+            }
+            display(context);
 
-        if(isSolved()){
-            Toast.makeText(context, "ПОБЕДА!", Toast.LENGTH_SHORT);
+            if (isSolved()) {
+                Toast.makeText(context, "ПОБЕДА!", Toast.LENGTH_SHORT);
+            }
         }
     }
 
     private static boolean isSolved() {
-        boolean solved = false;
-
         for (int i = 0; i < tileList.length ; i++){
             if(tileList[i].equals(String.valueOf(i))){
-
                 solved = true;
+
             } else {
                 solved = false;
                 break;
@@ -285,7 +290,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void onBackPressed() {
-        if (isSolved()) {
+        if (!running){
+            super.onBackPressed();}
+        else if (solved) {
             String title = "Сохранить результат?";
             String posString = "Да";
             String negString = "Нет";
