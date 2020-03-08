@@ -2,6 +2,7 @@ package com.example.tag_game;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,17 +11,20 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 
 public class GameActivity extends AppCompatActivity {
+
+
 
     private static final int COLUMNS = 4;
     private static final int DIMENSIONS = COLUMNS*COLUMNS;
@@ -36,8 +40,9 @@ public class GameActivity extends AppCompatActivity {
     public static final String RIGHT = "right";
     public static final String LEFT = "left";
 
+    public static String time;
 
-    private Context context;
+    private static Context contextSuper;
     private Button start, pause;
 
     private int seconds = 0;
@@ -51,14 +56,14 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         setTitle("Игра");
-        context = this;
+        contextSuper = this;
 
         Bundle arguments = getIntent().getExtras();
         selected = arguments.get("selected").toString();
 
         init();//инициализация списка ячеек
 
-        display(context);//отображение кнопок
+        display(contextSuper);//отображение кнопок
 
         setDimensions();
 
@@ -81,7 +86,7 @@ public class GameActivity extends AppCompatActivity {
             public void run() {
                 int min = (seconds % 3600) / 60;
                 int sec = seconds % 60;
-                String time = String.format("%02d:%02d", min, sec);
+                time = String.format("%02d:%02d", min, sec);
                 tvTime.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/myFont.ttf"));
                 tvTime.setText(time);
                 if(running){seconds++;}
@@ -99,7 +104,7 @@ public class GameActivity extends AppCompatActivity {
                 mColumnWidth = mGridView.getWidth() / COLUMNS;
                 mColumnHeight= mGridView.getHeight() / COLUMNS;
 
-                display(context);
+                display(contextSuper);
             }
         });
     }
@@ -207,6 +212,8 @@ public class GameActivity extends AppCompatActivity {
 
     private void scramble() { //перемешивание ячеек в массиве
         int index;
+        int sum = 0, countRow = 0;
+        boolean find15 = false;
         String temp;
         Random random = new Random();
         for (int i = tileList.length - 1; i>0;i--){
@@ -215,10 +222,30 @@ public class GameActivity extends AppCompatActivity {
             tileList[index] = tileList[i];
             tileList[i] = temp;
         }
+
+        //проверка на решвемость. Считаем пары, в которых первое число больше второго, проходя по всему полю.
+        for (int i = 0 ; i < tileList.length - 2;i++){
+            for (int j = i + 1 ; j < tileList.length - 1;j++){
+                if(Integer.parseInt(tileList[i]) > Integer.parseInt(tileList[j])){
+                    sum++;
+                }
+            }
+            if(tileList[i].equals("15")) {
+                find15 = true;
+            }
+            if ((i % 4 == 0)&&(!find15)){
+                countRow++;
+            }
+        }
+        sum = sum + countRow;
+        //Если нечётное, то снова перемешиваем
+        if (sum % 2 != 0){
+            scramble();
+        }
     }
 
     private void init() { //инициализация списка ячеек
-        mGridView = (GestureDetectGridView)findViewById(R.id.grid);
+        mGridView = findViewById(R.id.grid); //(GestureDetectGridView)
         mGridView.setNumColumns(COLUMNS);
 
 
@@ -232,10 +259,11 @@ public class GameActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             v.setClickable(false);
+            v.setVisibility(View.INVISIBLE);
             running = true;
             pause.setClickable(true);
             scramble();//перемешивание ячеек в массиве
-            display(context);
+            display(contextSuper);
         }
     };
 
@@ -245,7 +273,7 @@ public class GameActivity extends AppCompatActivity {
             running = false;
             String title = "Игра на паузе.";
             String posString = "Продолжить";
-            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(context,R.style.AlertDialogCustom));
+            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(contextSuper,R.style.AlertDialogCustom));
             ad.setTitle(title);  // заголовок
             ad.setPositiveButton(posString, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int arg1) {
@@ -259,6 +287,65 @@ public class GameActivity extends AppCompatActivity {
         }
     };
 
+    private void inputNameDialog(){
+        String title = "ПОБЕДА!\nСохранить результат?";
+        String posString = "Да";
+        String negString = "Нет";
+        running = false;
+        AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(contextSuper,R.style.AlertDialogCustom));
+        ad.setTitle(title);  // заголовок
+        ad.setPositiveButton(posString, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                dialog.cancel();
+                final Intent show = new Intent();
+                show.setClass(contextSuper, ResultsActivity.class);
+                show.putExtra("time", time);
+
+
+                //Получаем вид с файла alert_dialog.xml, который применим для диалогового окна:
+                LayoutInflater li = LayoutInflater.from(contextSuper);
+                View adView = li.inflate(R.layout.alert_dialog, null);
+
+                //Создаем AlertDialog
+                AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(contextSuper);
+
+                //Настраиваем prompt.xml для нашего AlertDialog:
+                mDialogBuilder.setView(adView);
+
+                //Настраиваем отображение поля для ввода текста в открытом диалоге:
+                final EditText userInput = (EditText) adView.findViewById(R.id.input_text);
+
+                //Настраиваем сообщение в диалоговом окне:
+                mDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        show.putExtra("name", userInput.getText());
+                                        show.putExtra("add", "yes");
+                                    }
+                                });
+
+                //Создаем AlertDialog:
+                AlertDialog alertDialog = mDialogBuilder.create();
+
+                //и отображаем его:
+                alertDialog.show();
+
+                finish();
+                startActivity(show);
+            }
+        });
+        ad.setNegativeButton(negString, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                dialog.cancel();
+                finish();
+            }
+        });
+        ad.setCancelable(false);
+        AlertDialog dialog = ad.create();
+        dialog.show();
+    }
 
     private static void swap(Context context, int position, int swap){
         if (running) {
@@ -270,7 +357,7 @@ public class GameActivity extends AppCompatActivity {
             display(context);
 
             if (isSolved()) {
-                Toast.makeText(context, "ПОБЕДА!", Toast.LENGTH_SHORT);
+                new GameActivity().inputNameDialog();
             }
         }
     }
@@ -292,20 +379,17 @@ public class GameActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (!running){
             super.onBackPressed();}
-        else if (solved) {
-            String title = "Сохранить результат?";
+       /* else if (solved) {//а нужен ли этот if???????
+            String title = "ПОБЕДА!\nСохранить результат?";
             String posString = "Да";
             String negString = "Нет";
             running = false;
-            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(context,R.style.AlertDialogCustom));
+            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(contextSuper,R.style.AlertDialogCustom));
             ad.setTitle(title);  // заголовок
             ad.setPositiveButton(posString, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int arg1) {
-                    Intent show = new Intent();
-                    show.setClass(context, ResultsActivity.class);
-                    finish();
-                    startActivity(show);
-
+                    dialog.cancel();
+                    inputNameDialog();
                 }
             });
             ad.setNegativeButton(negString, new DialogInterface.OnClickListener() {
@@ -317,13 +401,13 @@ public class GameActivity extends AppCompatActivity {
             ad.setCancelable(false);
             AlertDialog dialog = ad.create();
             dialog.show();
-        }
+        }*/
         else {
             running = false;
             String title = "Вы точно хотите выйти? Ваш результат не будет сохранен!";
             String posString = "Да";
             String negString = "Нет";
-            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(context,R.style.AlertDialogCustom));
+            AlertDialog.Builder ad = new AlertDialog.Builder(new ContextThemeWrapper(contextSuper,R.style.AlertDialogCustom));
             ad.setTitle(title);  // заголовок
             ad.setPositiveButton(posString, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int arg1) {
@@ -412,6 +496,8 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
 
 
