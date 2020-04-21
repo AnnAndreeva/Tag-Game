@@ -42,8 +42,8 @@
 
             <Button
                 android:id="@+id/btnDel"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 />
         </FrameLayout>
@@ -61,8 +61,8 @@
             tools:layout_editor_absoluteY="16dp" />
     </LinearLayout>
 
-    <GridView
-        android:id="@+id/gvRes"
+    <TableLayout
+        android:id="@+id/table"
         android:layout_width="416dp"
         android:layout_height="681dp"
         android:layout_marginTop="56dp"
@@ -75,7 +75,7 @@
         app:layout_constraintVertical_bias="0.0">
 
 
-    </GridView>
+    </TableLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

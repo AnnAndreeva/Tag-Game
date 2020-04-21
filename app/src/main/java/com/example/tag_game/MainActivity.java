@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                     "Представляет собой поле размером 4x4, в котором расположены квадраты с " +
                     "фрагментами изображения. Пользователь может перемещать квадраты по полю " +
                     "за счёт пустой ячейки. Цель игры - собрать изображение за наименьшее " +
-                    "число шагов.\nСоздатель: Андреева А.А.\nСтудентка СНИУ им. Королёва\n2019 г.");
+                    "время.\nСоздатель: Андреева А.А.\nСтудентка СНИУ им. Королёва\n2020 г.");
             builder.setNegativeButton("OK", new DialogInterface.OnClickListener(){
                 public void onClick(DialogInterface dialog, int id){
                     dialog.cancel();
@@ -84,5 +84,4 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         this.finish();
     }
-
 }

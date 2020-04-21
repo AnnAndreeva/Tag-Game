@@ -68,6 +68,7 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
         setTitle("Игра");
         contextSuper = this;
+        MyValues.time = "";
 
         inputNameDialog();
 
@@ -313,7 +314,7 @@ public class GameActivity extends AppCompatActivity {
 
         //Настраиваем сообщение в диалоговом окне:
         mDialogBuilder
-                .setCancelable(false)
+               // .setCancelable(false)
                 .setTitle(title)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
@@ -328,13 +329,15 @@ public class GameActivity extends AppCompatActivity {
 
         //Создаем AlertDialog:
         AlertDialog alertDialog = mDialogBuilder.create();
-
+        if (userInput.getText().toString().length() == 0){
+            MyValues.name = "Игрок";
+        }
         //и отображаем его:
         alertDialog.show();
     }
 
     private static void swap(Context context, int position, int swap){
-        //saveResultDialog();
+        
         if (running) {
            if (tileList[position + swap].equals("15")) {
                 String newPosition = tileList[position + swap];
