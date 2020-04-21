@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -301,13 +302,14 @@ public class GameActivity extends AppCompatActivity {
         View adView = li.inflate(R.layout.alert_dialog, null);
 
         //Создаем AlertDialog
-        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(contextSuper);
+        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(contextSuper,R.style.AlertDialogCustom));
 
         //Настраиваем prompt.xml для нашего AlertDialog:
         mDialogBuilder.setView(adView);
 
         //Настраиваем отображение поля для ввода текста в открытом диалоге:
         final EditText userInput = (EditText) adView.findViewById(R.id.input_text);
+
 
         //Настраиваем сообщение в диалоговом окне:
         mDialogBuilder
