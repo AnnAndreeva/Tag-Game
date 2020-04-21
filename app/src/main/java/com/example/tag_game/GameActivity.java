@@ -334,7 +334,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private static void swap(Context context, int position, int swap){
-        saveResultDialog();
+        //saveResultDialog();
         if (running) {
            if (tileList[position + swap].equals("15")) {
                 String newPosition = tileList[position + swap];
