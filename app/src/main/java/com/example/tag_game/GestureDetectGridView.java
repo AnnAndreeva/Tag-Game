@@ -14,6 +14,8 @@ import androidx.annotation.RequiresApi;
 
 import java.lang.annotation.Target;
 
+import static com.example.tag_game.GameActivity.moveTiles;
+
 public class GestureDetectGridView extends GridView {
 
     private static final int SWIPE_MIN_DISTANCE = 100;
@@ -53,37 +55,35 @@ public class GestureDetectGridView extends GridView {
              return  true;
          }
 
-         @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){
-             final  int position = GestureDetectGridView.this.pointToPosition
-                     (Math.round(e1.getX()), Math.round(e1.getY()));
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                                   float velocityY) {
+                final int position = GestureDetectGridView.this.pointToPosition
+                        (Math.round(e1.getX()), Math.round(e1.getY()));
 
-             if (Math.abs(e1.getY()-e2.getY())>SWIPE_MAX_OFF_PATH){
-                 if ((Math.abs(e1.getX()-e2.getX())>SWIPE_MAX_OFF_PATH)||
-                         Math.abs(velocityY)<SWIPE_THRESHOLD_VELOCITY){
-                     return false;
-                 }
-                 if ((e1.getY()-e2.getY())>SWIPE_MAX_OFF_PATH){
-                    //Добавить код для свайпа вверх
-                     GameActivity.moveTiles(context, GameActivity.UP, position);
-                 } else if ((e2.getY()-e1.getY())>SWIPE_MAX_OFF_PATH){
-                     //Добавить код для свайпа вниз
-                     GameActivity.moveTiles(context, GameActivity.DOWN, position);
-                 }
-             } else {
-                 if (Math.abs(velocityX) < SWIPE_THRESHOLD_VELOCITY) {
-                     return false;
-                 }
-                 if ((e1.getX() - e2.getX()) > SWIPE_MAX_OFF_PATH) {
-                     //Добавить код для свайпа влево
-                     GameActivity.moveTiles(context, GameActivity.LEFT, position);
-                 } else if ((e2.getX() - e1.getX()) > SWIPE_MAX_OFF_PATH) {
-                     //Добавить код для свайпа вправо
-                     GameActivity.moveTiles(context, GameActivity.RIGHT , position);
-                 }
-             }
-             return super.onFling(e1, e2, velocityX, velocityY);
-         }
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
+                    if (Math.abs(e1.getX() - e2.getX()) > SWIPE_MAX_OFF_PATH
+                            || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY) {
+                        return false;
+                    }
+                    if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE) {
+                        moveTiles(context, GameActivity.UP, position);
+                    } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE) {
+                        moveTiles(context, GameActivity.DOWN, position);
+                    }
+                } else {
+                    if (Math.abs(velocityX) < SWIPE_THRESHOLD_VELOCITY) {
+                        return false;
+                    }
+                    if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE) {
+                        moveTiles(context,GameActivity.LEFT, position);
+                    } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE) {
+                        moveTiles(context, GameActivity.RIGHT, position);
+                    }
+                }
+
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
         });
 
     }
@@ -93,23 +93,25 @@ public class GestureDetectGridView extends GridView {
         int action = ev.getActionMasked();
         gDetector.onTouchEvent(ev);
 
-        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP){
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             mFlingConfirmed = false;
-        } else if(action == MotionEvent.ACTION_DOWN) {
+        } else if (action == MotionEvent.ACTION_DOWN) {
             mTouchX = ev.getX();
             mTouchY = ev.getY();
         } else {
-            if(mFlingConfirmed){
+
+            if (mFlingConfirmed) {
                 return true;
             }
 
-            float dx = (Math.abs(ev.getX() - mTouchX));
-            float dy = (Math.abs(ev.getY() - mTouchY));
-            if((dx > SWIPE_MIN_DISTANCE)||(dy>SWIPE_MIN_DISTANCE)){
+            float dX = (Math.abs(ev.getX() - mTouchX));
+            float dY = (Math.abs(ev.getY() - mTouchY));
+            if ((dX > SWIPE_MIN_DISTANCE) || (dY > SWIPE_MIN_DISTANCE)) {
                 mFlingConfirmed = true;
                 return true;
             }
         }
+
         return super.onInterceptTouchEvent(ev);
     }
 

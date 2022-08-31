@@ -156,12 +156,34 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onGlobalLayout() {
                 mGridView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mColumnWidth = mGridView.getWidth() / COLUMNS;
-                mColumnHeight= mGridView.getHeight() / COLUMNS;
+                int displayWidth = mGridView.getMeasuredWidth();
+                int displayHeight = mGridView.getMeasuredHeight();
 
-                display(contextSuper);
+                int statusbarHeight = getStatusBarHeight(getApplicationContext());
+                int requiredHeight = displayHeight - statusbarHeight;
+
+                mColumnWidth = displayWidth / COLUMNS;
+                mColumnHeight = requiredHeight / COLUMNS;
+
+                display(getApplicationContext());
+                //mGridView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                //mColumnWidth = mGridView.getWidth() / COLUMNS;
+                //mColumnHeight= mGridView.getHeight() / COLUMNS;
+
+                //display(contextSuper);
             }
         });
+    }
+    private int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen",
+                "android");
+
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+
+        return result;
     }
 
     private static void display(Context context)
@@ -339,7 +361,8 @@ public class GameActivity extends AppCompatActivity {
     private static void swap(Context context, int position, int swap){
 
         if (running) {
-           if (tileList[position + swap].equals("15")) {
+           if (tileList[position + swap].equals("15"))
+            {
                 String newPosition = tileList[position + swap];
                 tileList[position + swap] = tileList[position];
                 tileList[position] = newPosition;
@@ -436,7 +459,9 @@ public class GameActivity extends AppCompatActivity {
             } else if (direction.equals(DOWN)) {
                 swap(context, position, COLUMNS);
             }
-        } else if (position > 0 && position < COLUMNS - 1) {//Верхние ячейки
+        }
+
+        else if (position > 0 && position < COLUMNS - 1) {//Верхние ячейки
             if (direction.equals(RIGHT)) {
                 swap(context, position, 1);
             } else if (direction.equals(LEFT)) {
@@ -444,13 +469,15 @@ public class GameActivity extends AppCompatActivity {
             } else if (direction.equals(DOWN)) {
                 swap(context, position, COLUMNS);
             }
-        } else if (position == COLUMNS - 1) { //Правый верхний угол
+        }
+        else if (position == COLUMNS - 1) { //Правый верхний угол
             if (direction.equals(LEFT)) {
                 swap(context, position, -1);
             } else if (direction.equals(DOWN)) {
                 swap(context, position, COLUMNS);
             }
-        } else if (position > COLUMNS - 1 && position < DIMENSIONS - COLUMNS
+        }
+        else if (position > COLUMNS - 1 && position < DIMENSIONS - COLUMNS
                 && position % COLUMNS == 0) { //Левые ячейки
             if (direction.equals(UP)) {
                 swap(context, position, -COLUMNS);
@@ -459,7 +486,8 @@ public class GameActivity extends AppCompatActivity {
             } else if (direction.equals(DOWN)) {
                 swap(context, position, COLUMNS);
             }
-        } else if (position == COLUMNS * 3 - 1 || position == COLUMNS * 4 - 1) { //Правые ячейки И нижний правый угол
+        }
+        else if (position == COLUMNS * 3 - 1 || position == COLUMNS * 4 - 1) { //Правые ячейки И нижний правый угол
             if (direction.equals(UP)) {
                 swap(context, position, -COLUMNS);
             } else if (direction.equals(LEFT)) {
@@ -470,13 +498,15 @@ public class GameActivity extends AppCompatActivity {
                     swap(context, position, COLUMNS);
                 }
             }
-        } else if (position == DIMENSIONS - COLUMNS) {//нижний левый угол
+        }
+        else if (position == DIMENSIONS - COLUMNS) {//нижний левый угол
             if (direction.equals(UP)) {
                 swap(context, position, -COLUMNS);
             } else if (direction.equals(RIGHT)) {
                 swap(context, position, 1);
             }
-        } else if (position > DIMENSIONS - COLUMNS && position < COLUMNS - 1) {//Нижние ячейки
+        }
+        else if (position < DIMENSIONS - 1 && position > DIMENSIONS - COLUMNS) {//Нижние ячейки
             if (direction.equals(UP)) {
                 swap(context, position, -COLUMNS);
             } else if (direction.equals(RIGHT)) {
@@ -484,7 +514,8 @@ public class GameActivity extends AppCompatActivity {
             } else if (direction.equals(LEFT)) {
                 swap(context, position, -1);
             }
-        } else { //центральные
+        }
+        else { //центральные
             if (direction.equals(UP)) {
                 swap(context, position, -COLUMNS);
             } else if (direction.equals(LEFT)) {
